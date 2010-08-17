@@ -223,7 +223,7 @@ var Dict = new Class({
 				location.hash = hash;
 				
 				// important to leave it this way! Otherwise browser might get into a loop,
-				// e.g. changing spaces into '%20's
+				// e.g. changing spaces into '%20's, so that the script will consider the hash changed
 				this.lastHash = location.hash;
 			}
 			
@@ -255,13 +255,13 @@ var Dict = new Class({
 				}
 			}
 			else {
-				if ( this.options.hotkey.key != null )
+				if ( this.options.hotkey.key == null )
 						return;
 				
-				hotkey = this.options.hotkey.key;
-				
+				hotkey = this.options.hotkey;
+				console.log(hotkey);
 				switch (ev.key) {
-					case this.options.hotkey.key:
+					case hotkey.key:
 						if (
 						   (ev.control == hotkey.control)
 						&& (ev.alt == hotkey.alt)
