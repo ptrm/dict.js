@@ -53,6 +53,9 @@ var Dict = new Class({
 				this.checkHashIntervalId = this.checkHash.periodical(this.options.pollHashInterval, this);
 			else
 				this.parseHash();
+			
+			if ( this.isOpen() )
+				this.el.input.focus();
 		}
 		
 		, implement: function () {
