@@ -1,1 +1,5 @@
-Synonym/antonym lists - make whole phrases clickable, not separate words.
+Consider using XRegexp, http://xregexp.com/
+
+word--word should not be treated as one (e.g. in "get" definition example sentence)
+
+check buildLinks() behaviour with IFrames
