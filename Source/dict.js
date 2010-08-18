@@ -27,6 +27,7 @@ var Dict = new Class({
 		  		, closeable: true
 		  		, pollHash: true
 		  		, pollHashInterval: 200
+		  		, buildLinks: true
 		  		, modifyHash: true
 		  		, modifyTitle: true
 		  		, customStatus: ''
@@ -63,7 +64,7 @@ var Dict = new Class({
 			//code partly from http://davidwalsh.name/mootools-show-hide
 			if ( !Element.hide ) {
 				Element.implement({
-					hide: function() {
+					hide: function() {	
 						this.setStyle('display','none');
 					}
 				});
@@ -77,10 +78,16 @@ var Dict = new Class({
 				});
 			}
 			
+			// reverse items order in hash. Useful if we want to do Hash.each in reverse order.
 			if ( !Hash.reverse ) {
 				Hash.implement({
 					reverse: function() {
-						return new Hash(this.getValues().reverse().associate(this.getKeys().reverse()));
+						reversed = this.getValues().reverse().associate(this.getKeys().reverse());
+						
+						this.empty();
+						this.extend(reversed);
+						
+						return this;
 					}
 				});
 			}
@@ -157,69 +164,123 @@ var Dict = new Class({
 			this.el.container.injectInside(document.body);
 		}
 		
-		, walkTree: function (el) {
-			if ( typeof el != 'object')
+		, walkTree: function (el, level) {
+			if ( level == null )
+				level = 1;
+				
+			if ( (typeof el != 'object') || el == null )
 				return;
 				
 			switch ( $type(el) ) {
 				case 'textnode':
 					text = this.insertLinks(el.nodeValue);
-					this.replaceWithNodes(text, el);
+					if ( el.nodeValue != text )
+						el = this.replaceWithNodes(text, el);
 				break;
 				
 				case 'element':
-					if ( el.get('tag') == 'a' )
-						return;
+					if ( el.nodeName == 'A' ) {
+						break;
+					}
 					
 					if (!el.childNodes.length)
-						return;
-					
-					nodes = new Hash(el.childNodes);
-					nodes.each(this.walkTree, this);
+						break;
+						
+					this.walkTree(el.childNodes[0], level + 1);
+				break;
+				
+				default:
 				break;
 			}
 			
+			if ( el != null )
+				this.walkTree(el.nextSibling, level)
+
+			return el;
 		}
 		
 		, insertLinks: function (text) {
 			// first, add links to synonym/antonym phrases, these are the only case in which
 			// we should consider adding more than one word to a link
 			
-			// only safe for use with dict definitions
+			// only safe for use with pure text without tags
 			// rest of the words, one by one
 			return text.replace(/\b([\w-]{2,})\b/g, '<a ' + this.wordLinkAttrs + '>$1</a>');
 		}
 		
-		, replaceWithNodes: function (text, node) {
-			parent = node.parentNode;
+		, insertPhraseLinks: function (el, tag, closeTag, prefix, suffix) {
+			// If no closeTag is defined, assume it is the html tag
+			if ( !closeTag ) {
+				openTag = '<' + tag + '>';
+				closeTag = '</' + tag + '>';
+				
+				// in this case, we preserve the tags
+				if (!prefix)
+					prefix = openTag;
+				
+				if (!suffix)
+					suffix = closeTag;
+			}
+			// else, it might be e.g. { and } tags, so don't put them
+			else {
+				openTag = tag;
+
+				// this time, if not explicitly set, we forget the tags
+				if (!prefix)
+					prefix = '';
+				
+				if (!suffix)
+					suffix = '';
+			}
+			
+			// case insensitive for Internet Explorer, which makes tags uppercase
+			exp = new RegExp(
+							  openTag.escapeRegExp()
+								+ '([^' + openTag.substr(0, 1).escapeRegExp()
+								+ ']+)' + closeTag.escapeRegExp()
+							, 'gi'
+							);
+			
+			text = el.get('html');
+			
+			text = text.replace(exp, prefix + '<a ' + this.wordLinkAttrs + '>$1</a>' + suffix)
+			el.set('html', text);
+			
+			this.scanLinks(el);
+		}
 		
+		, replaceWithNodes: function (text, node) {
 			newEl = new Element('div', { html: text });
-			newEls = new Hash(newEl.childNodes);
 			
-			// we use insertBefore(), so let's revert the order
-			newEls = newEls.reverse();
-			
-			newEls.each(function(el) {
+			// IE 6 complained otherwise
+			if ( !newEl.childNodes ) {
+				return;
+			}
+				
+			while ( el = newEl.childNodes[0] ) {
 				if ( typeof el != 'object')
 					return;
-				parent.insertBefore(el, node);
-			});
+				
+				node.parentNode.insertBefore(el, node);
+
+				lastNode = el;
+			}
 			
 			node.parentNode.removeChild(node);
+			newEl.dispose();
 			
+			return lastNode;
 		}
 		
 		, buildLinks: function (el) {
+			// Large elements may cause stack overflow / out of memory errors on IE 6
+			if ( Browser.Engine.trident4 )
+				return;
+				
 			if ( el == null )
 				el = this.el.def;
 			
-			// we can only be sure of phrases if they are defined {phrase one} in definition,
-			// thus this code outside this.walkLinks()
-			text = el.get('html')
-			text = text.replace(/<em>([^<]+)<\/em>/g, '<em><a ' + this.wordLinkAttrs + '>$1</a></em>')
-			el.set('html', text);
-
-			this.walkTree(el)
+			this.walkTree(el.childNodes[0]);
 			
 			this.scanLinks(el);
 		}
@@ -385,19 +446,19 @@ var Dict = new Class({
 				case 'fail':
 					this.el.status.set('class', 'fail');
 					
-					this.el.def.set('html', this.options.captions.stateFailed);
+					this.displayDef(this.options.captions.stateFailed);
 				break;
 				
 				case 'cancel':
 					this.el.status.set('class', 'cancel');
 					
-					this.el.def.set('html', this.options.captions.stateCancelled);
+					this.displayDef(this.options.captions.stateCancelled);
 				break;
 				
 				case 'loading':
 					this.el.status.set('class', 'loading');
 					
-					this.el.def.set('html', this.options.captions.stateLoading);
+					this.displayDef(this.options.captions.stateLoading);
 				break;
 				
 				default:
@@ -521,7 +582,10 @@ var Dict = new Class({
 				this.el.def.set('html', this.parseDef(this.definition.def, this.word));
 				this.el.dbInfo.set('html', this.definition.db.desc);
 
-				this.buildLinks();
+				this.insertPhraseLinks(this.el.def, 'em');
+
+				if (this.options.buildLinks)
+					this.buildLinks();
 			}
 			else
 				this.el.def.set('html', def);
