@@ -76,6 +76,14 @@ var Dict = new Class({
 					}
 				});
 			}
+			
+			if ( !Hash.reverse ) {
+				Hash.implement({
+					reverse: function() {
+						return new Hash(this.getValues().reverse().associate(this.getKeys().reverse()));
+					}
+				});
+			}
 		}
 		
 		, initVars: function () {
@@ -87,6 +95,9 @@ var Dict = new Class({
 			this.definition = '';
 			
 			this.state = '';
+			
+			this.wordLinkClass = 'dict_showDef';
+			this.wordLinkAttrs = 'href="#" class="'+this.wordLinkClass+'"';
 			
 			this.initialTitle = document.title;
 			
@@ -146,17 +157,69 @@ var Dict = new Class({
 			this.el.container.injectInside(document.body);
 		}
 		
+		, walkTree: function (el) {
+			if ( typeof el != 'object')
+				return;
+				
+			switch ( $type(el) ) {
+				case 'textnode':
+					text = this.insertLinks(el.nodeValue);
+					this.replaceWithNodes(text, el);
+				break;
+				
+				case 'element':
+					if ( el.get('tag') == 'a' )
+						return;
+					
+					if (!el.childNodes.length)
+						return;
+					
+					nodes = new Hash(el.childNodes);
+					nodes.each(this.walkTree, this);
+				break;
+			}
+			
+		}
+		
 		, insertLinks: function (text) {
-			return text.replace(/([^<]|^)\b([\w-]{2,})\b(?![>])/g, '$1<a href="#" class="dict_showDef">$2</a>');
+			// first, add links to synonym/antonym phrases, these are the only case in which
+			// we should consider adding more than one word to a link
+			
+			// only safe for use with dict definitions
+			// rest of the words, one by one
+			return text.replace(/\b([\w-]{2,})\b/g, '<a ' + this.wordLinkAttrs + '>$1</a>');
+		}
+		
+		, replaceWithNodes: function (text, node) {
+			parent = node.parentNode;
+		
+			newEl = new Element('div', { html: text });
+			newEls = new Hash(newEl.childNodes);
+			
+			// we use insertBefore(), so let's revert the order
+			newEls = newEls.reverse();
+			
+			newEls.each(function(el) {
+				if ( typeof el != 'object')
+					return;
+				parent.insertBefore(el, node);
+			});
+			
+			node.parentNode.removeChild(node);
+			
 		}
 		
 		, buildLinks: function (el) {
 			if ( el == null )
 				el = this.el.def;
 			
-			el.set('html',
-				this.insertLinks(el.get('html'))
-			);
+			// we can only be sure of phrases if they are defined {phrase one} in definition,
+			// thus this code outside this.walkLinks()
+			text = el.get('html')
+			text = text.replace(/<em>([^<]+)<\/em>/g, '<em><a ' + this.wordLinkAttrs + '>$1</a></em>')
+			el.set('html', text);
+
+			this.walkTree(el)
 			
 			this.scanLinks(el);
 		}
@@ -262,7 +325,6 @@ var Dict = new Class({
 						return;
 				
 				hotkey = this.options.hotkey;
-				console.log(hotkey);
 				switch (ev.key) {
 					case hotkey.key:
 						if (
@@ -404,9 +466,11 @@ var Dict = new Class({
 									  this.options.captions.notFound
 									  	+ ' ' + this.options.captions.suggestion
 										+ '<ul class="suggestions"><li>'
-										+ this.insertLinks(suggestions.join('</li><li>'))
+										+ suggestions.join('</li><li>')
 										+ '</li></ul>'
 						);
+						
+						this.buildLinks($$('#' + this.el.def.id + ' ul.suggestions')[0]);
 						
 						this.scanLinks();
 					}
@@ -428,11 +492,24 @@ var Dict = new Class({
 		
 		, parseDef: function (def, word) {
 			wordReg = new RegExp('^' + word + '$', 'im');
-			
+
 			def = def.replace(wordReg, '').trim()
-					.replace(/^\s*\b(([a-z]+[ ])[0-9]+)(:)/img, '<br /><br /><strong>$1</strong>$3')
+					// first meaning, separated by double newline
+					.replace(/^\s*\b(([a-z]+[ ])1)(:)/img, '<br /><br /><strong>$1</strong>$3')
+					
+					// meaning numbers
 					.replace(/^\s*\b([0-9]+)(:)/img, '<br /><strong>$1</strong>$2')
-					.replace(/^[\s\r\n]*(<br( \/)?>)+/, '')
+					
+					// glue words ending with dash before newline to the word following in the next line.
+					.replace(/([\w-]+-)+\r?\n\s*([\w-]+)\b/g, '$1$2')
+					
+					// <br />s at the beginning
+					.replace(/^(<br([ ]?\/)?>)+/, '')
+					
+					// whitespaces and newlines
+					.replace(/[\s\r\n]+(?=[\s\r\n])/g, '')
+					
+					// synonym/antonym words or phrases
 					.replace(/\{([^\}]+)\}/g, '<em>$1</em>')
 				;
 			
@@ -483,8 +560,6 @@ var Dict = new Class({
 			
 			if ( idx == -1)
 				return;
-			
-			console.log(idx);
 			
 			this.cacheWords.splice(idx, 1);
 			this.cacheDefs.splice(idx, 1);			
