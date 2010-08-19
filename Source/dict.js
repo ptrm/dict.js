@@ -130,11 +130,9 @@ var Dict = new Class({
 													});
 			this.el.submit = new Element('input', {id: this.options.baseId + '-submit'
 													, type: 'submit'
-													, value: this.options.captions.submit
 													});
 			this.el.reset = new Element('input', {id: this.options.baseId + '-reset'
 													, type: 'reset'
-													, value: this.options.captions.cancel
 													});
 			this.el.def = new Element('div', {id: this.options.baseId + '-def'});
 			this.el.dbInfo = new Element('div', {id: this.options.baseId + '-dbInfo'});
@@ -162,6 +160,13 @@ var Dict = new Class({
 			this.el.main.inject(this.el.container);
 			
 			this.el.container.injectInside(document.body);
+			
+			this.updateCaptions();
+		}
+		
+		, updateCaptions: function () {
+			this.el.submit.set('value', this.options.captions.submit);
+			this.el.reset.set('value', this.options.captions.cancel);
 		}
 		
 		, walkTree: function (el, level) {
@@ -488,6 +493,19 @@ var Dict = new Class({
 			
 			if ( (word != '') && !this.getDefFromCache(word) )
 				this.getDef(word);
+		}
+		
+		, reloadDef: function (removeFromCache) {
+			if ( !this.word )
+				return;
+			
+			word = this.word;
+			this.word = '';
+
+			if (removeFromCache)
+				this.removeFromCache(word);
+
+			this.loadDef(word);
 		}
 		
 		, getDef: function (word) {
