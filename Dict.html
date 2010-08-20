@@ -3,30 +3,50 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <title>Dict</title>
-<!--link rel="shortcut icon" href="favicon.ico" type="image/x-icon"/-->
 <link rel="stylesheet" type="text/css" href="assets/css/style.css"/>
 
 <script type="text/javascript" src="assets/js/mootools-core.js"></script>
-
+<script type="text/javascript" src="assets/js/moocheck-yui.js"></script>
 <script type="text/javascript" src="Source/dict.js"></script>
 <script type="text/javascript" src="assets/js/loadDict.js"></script>
 </head>
 <body>
 
-<a href="#" id="a_about">about</a>
+<div id="links">
+	<div class="boxParent">
+		<a href="#" class="toggle" rel="prefs">…</a>
+		<div class="box" id="prefs">
+			<label for="prefs_dontBuildLinks"  title="set if browser uses too much RAM when browsing this page">
+				<input type="checkbox" id="prefs_dontBuildLinks" /><span>don't build links in definitions</span>
+			</label>
+			
+			<fieldset id="prefs_lang"><span class="legend">language:</span>
+					<label for="radio_lang_default"><input type="radio" name="radio_lang" id="radio_lang_default" value="_default" checked="checked" /><span>auto</span></label>
+			</fieldset>
+				
+			<div class="buttons">
+				<a href="#" id="prefs_save" class="button">save</a>
+				<a href="#" id="prefs_discard" class="button">discard</a>
+				<div></div>
+			</div>
+		</div>
+	</div>
 
-<div id="about">
-	<a href="#" id="a_aboutClose">close</a>
-	<p>
-		<a href="http://github.com/ptrm/dict.js"><strong>Dict.js</strong></a> – a simple <a href="http://github.com/ptrm/dict.json">dict.json</a> interface written in javascript using <a href="http://mootools.net/">mootools</a>.
-	</p>
-	<p>
-		Look up any word from the definition simply by clicking it.
-	</p>
-	<p>
-		Use the back and forward browser buttons to move through recent definitions.<br />
-		(IE currently not supported)
-	</p>
+	<div class="boxParent">
+		<a href="#" class="toggle" rel="about">?</a>
+		<div class="box" id="about">
+			<p>
+				<a href="http://github.com/ptrm/dict.js"><strong>Dict.js</strong></a> – a simple <a href="http://github.com/ptrm/dict.json">dict.json</a> front-end written using <a href="http://mootools.net/">mootools</a> and <a href="http://lipidity.com/fancy-form/">FancyForm</a>.
+			</p>
+			<p>
+				Look up any word from the definition simply by clicking it.
+			</p>
+			<p>
+				Use the back and forward browser buttons to move through recent definitions.
+				(IE currently not supported)
+			</p>
+		</div>
+	</div>
 </div>
 
 </body>
