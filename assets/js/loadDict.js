@@ -45,13 +45,13 @@ document.addEvent('domready', function () {
 														ev.preventDefault();
 														savePrefs();
 														hideAll();
-														$$('#prefs').fireEvent('open', ev);
+														$('prefs').fireEvent('open');
 	});
 	
 	$('prefs_discard').addEvent('click', function(ev) {
 														ev.preventDefault();
 														hideAll();
-														$$('#prefs').fireEvent('close', ev);
+														$('prefs').fireEvent('close');
 	});
 	
 	$$('div.boxParent a.toggle').each(function (el) {
@@ -67,6 +67,7 @@ document.addEvent('domready', function () {
 	});
 	
 	var outsideClick = function (ev) {
+		$$('div.boxParent.show div.box').fireEvent('close');
 		hideAll();
 	}
 	
