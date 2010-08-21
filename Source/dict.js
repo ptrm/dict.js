@@ -226,7 +226,7 @@ var Dict = new Class({
 				if (!suffix)
 					suffix = closeTag;
 			}
-			// else, it might be e.g. { and } tags, so don't put them
+			// else, it might be e.g. { and } tags, so don't put them between '<' and '>'
 			else {
 				openTag = tag;
 
