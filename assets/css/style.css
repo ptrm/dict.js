@@ -313,6 +313,7 @@ div.buttons div {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	margin: 0;
+	margin-left: 60px;
 	padding: 2px;
 	height: 32px;
 	font-size: 24px;
