@@ -671,9 +671,9 @@ var Dict = new Class({
 				}
 				this.el.pron.set('html', this.pronunciation.def);
 				
-				this.el.dbInfo.set('html', (this.pronunciation.db.desc ? this.pronunciation.db.desc : '')
-											+ (this.pronunciation.db.desc && this.definition.db.desc ? ', ' : '')
-											+ (this.definition.db.desc ? this.definition.db.desc : '')
+				this.el.dbInfo.set('html', (this.pronunciation.db ? this.pronunciation.db.desc : '')
+											+ (this.pronunciation.db && this.definition.db ? ', ' : '')
+											+ (this.definition.db ? this.definition.db.desc : '')
 				);
 
 				this.insertPhraseLinks(this.el.def, 'em');
