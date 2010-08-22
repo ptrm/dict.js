@@ -33,6 +33,13 @@ var Dict = new Class({
 		  		, customStatus: ''
 		  		, hideStatus: true
 		  		, cacheSize: 64
+		  		, defDb: 'wn'
+		  		, pron: {
+		  				  db: 'cmupd'
+		  				, delim: ', '
+		  				, openTag: '<span class="pronunciation">/'
+		  				, closeTag: '/</span>'
+		  		}
 		}
 		
 		, Implements: [ Options, Events ]
@@ -98,6 +105,7 @@ var Dict = new Class({
 			this.el = {};
 			this.cacheWords = [];
 			this.cacheDefs = [];
+			this.cacheProns = [];
 			this.word = '';
 			this.definition = '';
 			
@@ -137,6 +145,8 @@ var Dict = new Class({
 			this.el.def = new Element('div', {id: this.options.baseId + '-def'});
 			this.el.dbInfo = new Element('div', {id: this.options.baseId + '-dbInfo'});
 			
+			this.el.pron = new Element('div', {id: this.options.baseId + '-pron'});
+			
 			this.el.form.addEvent('submit', this.onFormSubmit.bind(this));
 			this.el.form.addEvent('reset', this.onFormReset.bind(this));
 			
@@ -154,6 +164,8 @@ var Dict = new Class({
 				this.el.status.inject(this.el.main);
 			}
 			
+			// pronunciation will be injected after word header in the definition
+			//this.el.pron.inject(this.el.main);
 			this.el.def.inject(this.el.main);
 			this.el.dbInfo.inject(this.el.main);
 			
@@ -333,6 +345,7 @@ var Dict = new Class({
 			this.fireEvent('clear');
 		
 			this.el.input.set('value', '');
+			this.el.pron.set('html', '');
 			this.el.def.set('html', '');
 			this.el.dbInfo.set('html', '');
 		}
@@ -510,7 +523,14 @@ var Dict = new Class({
 		
 		, getDef: function (word) {
 			this.setState('loading');
-			this.request.send(Hash.toQueryString({word: word, suggestions: true}));			
+			this.request.send(Hash.toQueryString({
+													  word: word
+													, suggestions: true
+													, db: [
+														    this.options.defDb
+														  , this.options.pron.db
+													]
+			}));
 		}
 		
 		, setReqEvents: function() {
@@ -534,10 +554,47 @@ var Dict = new Class({
 						return;
 					}
 					
-					this.definition = new Hash(definitions[0] ? definitions[0] : {});
+					defs = [];
+					prons = [];
 					
-					if (this.definition.def) {
-						this.addToCache(this.word, this.definition);
+					// as for now, we only use single non-virtual databases, so the last db description
+					// is the description applicable for all definitions
+					lastDefDb = {};
+					lastPronDb = {};
+					
+					for (defIdx in definitions) {
+						def = new Hash(definitions[defIdx]);
+						if ( !def.db || !def.def )
+							continue;
+
+						if ( def.db.name == this.options.defDb ) {
+							defs.push(def.def);
+							lastDefDb = def.db;
+						}
+						else if ( (def.db.name == this.options.pron.db) && (prons.indexOf(def.def) < 0) ) {
+							prons.push(def.def);
+							lastPronDb = def.db;
+						}
+					}
+					
+					this.definition = {
+										  def: defs.join("\r\n\r\n")
+										, db: lastDefDb
+					};
+					
+					this.pronunciation = prons.length ? {
+										  def: this.options.pron.openTag
+										  	+ prons.join(
+										  				this.options.pron.closeTag
+										  				+ this.options.pron.delim
+										  				+ this.options.pron.openTag
+										  	)
+										  	+ this.options.pron.closeTag
+										, db: lastPronDb
+					} : '';	
+					
+					if (this.definition.def || this.pronunciation.def) {
+						this.addToCache(this.word, this.definition, this.pronunciation);
 						this.displayDef();
 					}
 					else if ( suggestions.length ) {
@@ -570,20 +627,20 @@ var Dict = new Class({
 		}
 		
 		, parseDef: function (def, word) {
-			wordReg = new RegExp('^' + word + '$', 'im');
+			wordReg = new RegExp('^(' + word + ')$', 'im');
 
-			def = def.replace(wordReg, '').trim()
+			def = def.replace(wordReg, '<h1>$1</h1>').trim()
 					// first meaning, separated by double newline
-					.replace(/^\s*\b(([a-z]+[ ])1)(:)/img, '<br /><br /><strong>$1</strong>$3')
+					.replace(/^\s*\b(([a-z]+[ ])1)(:)/img, '</p><p class="first"><strong>$1</strong>$3')
 					
 					// meaning numbers
-					.replace(/^\s*\b([0-9]+)(:)/img, '<br /><strong>$1</strong>$2')
+					.replace(/^\s*\b([0-9]+)(?=:)/img, '</p><p><strong>$1</strong>')
+					
+					// remove </p> occuring after <h1> or at the beginning
+					.replace(/(^|<\/h1>)\s*<\/p>/g, '$1')
 					
 					// glue words ending with dash before newline to the word following in the next line.
 					.replace(/([\w-]+-)+\r?\n\s*([\w-]+)\b/g, '$1$2')
-					
-					// <br />s at the beginning
-					.replace(/^(<br([ ]?\/)?>)+/, '')
 					
 					// whitespaces and newlines
 					.replace(/[\s\r\n]+(?=[\s\r\n])/g, '')
@@ -592,18 +649,44 @@ var Dict = new Class({
 					.replace(/\{([^\}]+)\}/g, '<em>$1</em>')
 				;
 			
+			// closing <p> tags if necessary
+			p = def.match(/<p\W/gi);
+			pC = def.match(/<\/p>/gi);
+			if ( p && pC && (p.length != pC.length) ) {
+				def = def + '</p>';
+			}
+			
 			return def;
 		}
 		
 		, displayDef: function (def) {
 			if ( def == null ) {
-				this.el.def.set('html', this.parseDef(this.definition.def, this.word));
-				this.el.dbInfo.set('html', this.definition.db.desc);
+				if (this.definition.def) {
+					this.el.def.set('html', this.parseDef(this.definition.def, this.word));
+				}
+				else {
+					// a way for escaping
+					this.el.def.set('html', '<h1></h1>');
+					this.el.def.getElement('h1').appendText(this.word);
+				}
+				this.el.pron.set('html', this.pronunciation.def);
+				
+				this.el.dbInfo.set('html', (this.pronunciation.db.desc ? this.pronunciation.db.desc : '')
+											+ (this.pronunciation.db.desc && this.definition.db.desc ? ', ' : '')
+											+ (this.definition.db.desc ? this.definition.db.desc : '')
+				);
 
 				this.insertPhraseLinks(this.el.def, 'em');
-
+				
 				if (this.options.buildLinks)
 					this.buildLinks();
+
+				el = this.el.def.getElement('h1');
+				if (el)
+					this.el.pron.inject(el, 'after');
+				else
+					this.el.pron.inject(this.el.def, 'top');
+
 			}
 			else
 				this.el.def.set('html', def);
@@ -616,25 +699,29 @@ var Dict = new Class({
 				return false;
 			
 			this.definition = this.cacheDefs[idx];
+			this.pronunciation = this.cacheProns[idx];
 			
 			this.displayDef();
 			
 			this.cacheWords.splice(idx, 1);
 			this.cacheDefs.splice(idx, 1);
+			this.cacheProns.splice(idx, 1);
 			
-			this.addToCache(word, this.definition);
+			this.addToCache(word, this.definition, this.pronunciation);
 			
 			return true;
 		}
 		
-		, addToCache: function (word, def) {
+		, addToCache: function (word, def, pron) {
 			this.removeFromCache(word);
 			
 			this.cacheWords.unshift( word.toLowerCase() );
 			this.cacheDefs.unshift(def);
+			this.cacheProns.unshift(pron);
 			
 			this.cacheWords = this.cacheWords.slice(0, this.options.cacheSize);
 			this.cacheDefs = this.cacheDefs.slice(0, this.options.cacheSize);			
+			this.cacheProns = this.cacheProns.slice(0, this.options.cacheSize);			
 		}
 		
 		, removeFromCache: function (word) {
@@ -645,5 +732,6 @@ var Dict = new Class({
 			
 			this.cacheWords.splice(idx, 1);
 			this.cacheDefs.splice(idx, 1);			
+			this.cacheProns.splice(idx, 1);			
 		}
 });
