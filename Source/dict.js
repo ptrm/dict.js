@@ -307,6 +307,7 @@ var Dict = new Class({
 			id = (parent != null) ? '#' + parent.id : '';
 			
 			$$(id + ' a.dict_showDef').each(function (link) {
+				link.set('href', '#def:' + encodeURIComponent(link.get('text')) );
 				link.addEvent('click', this.wordClick.bindWithEvent(this, link));
 
 				link.removeClass('dict_showDef');
