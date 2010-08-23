@@ -342,13 +342,22 @@ div.buttons div {
 	font-size: 17px;
 }
 
-#dict-def h1 {
-	display: inline;
+#dict-def h1, #dict-def h2 {
 	margin: 0;
 	padding: 0;
 	
-	font-size: 32px;
 	font-family: Baskerville, 'Times New Roman', serif;
+}
+
+#dict-def h1 {
+	display: inline;
+	font-size: 32px;
+	font-weight: normal;
+}
+
+#dict-def h2 {
+	margin-top: 10px;
+	font-size: inherit;
 	font-weight: normal;
 }
 
@@ -357,11 +366,6 @@ div.buttons div {
 	padding: 0;
 	padding-left: 28px;
 	text-indent: -15px;
-}
-
-#dict-def p.first {
-	margin-top: 10px;
-	padding-left: 15px;
 }
 
 #dict-def ul {

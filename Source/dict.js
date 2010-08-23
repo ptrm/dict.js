@@ -98,6 +98,19 @@ var Dict = new Class({
 					}
 				});
 			}
+			
+			// change '<', '>', and '&' to entities
+			if ( !String.htmlEntities ) {
+				String.implement({
+					htmlEntities: function () {
+						return this
+								.replace(/</g, '&lt;')
+								.replace(/>/g, '&gt;')
+								.replace(/&/g, '&amp;')
+						;
+					}
+				});
+			}
 		}
 		
 		, initVars: function () {
@@ -223,7 +236,8 @@ var Dict = new Class({
 			
 			// only safe for use with pure text without tags
 			// rest of the words, one by one
-			return text.replace(/\b([\w-]{2,})\b/g, '<a ' + this.wordLinkAttrs + '>$1</a>');
+			// simple workaround for entitites, may omit some non-entitites too sometimes
+			return text.replace(/(^|[^&])\b([\w-]{2,})\b/g, '$1<a ' + this.wordLinkAttrs + '>$2</a>');
 		}
 		
 		, insertPhraseLinks: function (el, tag, closeTag, prefix, suffix) {
@@ -569,6 +583,11 @@ var Dict = new Class({
 						def = new Hash(definitions[defIdx]);
 						if ( !def.db || !def.def )
 							continue;
+						
+						if ( typeof def.def == 'string' )
+							def.def = def.def.htmlEntities();
+						else
+							continue;
 
 						if ( def.db.name == this.options.defDb ) {
 							defs.push(def.def);
@@ -630,11 +649,14 @@ var Dict = new Class({
 		}
 		
 		, parseDef: function (def, word) {
-			wordReg = new RegExp('^(' + word + ')$', 'im');
+			wordReg = new RegExp('^(' + word.escapeRegExp() + ')$', 'im');
 
-			def = def.replace(wordReg, '<h1>$1</h1>').trim()
-					// first meaning, separated by double newline
-					.replace(/^\s*\b(([a-z]+[ ])1)(:)/img, '</p><p class="first"><strong>$1</strong>$3')
+			def = def.htmlEntities()
+					// headword
+					.replace(wordReg, '<h1>$1</h1>').trim()
+					
+					// first meaning
+					.replace(/^\s*\b([a-z]+)[ ](1)(:)/img, '</p><h2>$1</h2><p><strong>$2</strong>$3')
 					
 					// meaning numbers
 					.replace(/^\s*\b([0-9]+)(?=:)/img, '</p><p><strong>$1</strong>')
@@ -650,6 +672,12 @@ var Dict = new Class({
 					
 					// synonym/antonym words or phrases
 					.replace(/\{([^\}]+)\}/g, '<em>$1</em>')
+					
+					// full subheaders
+					.replace(/<h2>n<\/h2>/g, '<h2>noun</h2>')
+					.replace(/<h2>v<\/h2>/g, '<h2>verb</h2>')
+					.replace(/<h2>adj<\/h2>/g, '<h2>adjective</h2>')
+					.replace(/<h2>adv<\/h2>/g, '<h2>adverb</h2>')
 				;
 			
 			// closing <p> tags if necessary
@@ -668,9 +696,7 @@ var Dict = new Class({
 					this.el.def.set('html', this.parseDef(this.definition.def, this.word));
 				}
 				else {
-					// a way for escaping
-					this.el.def.set('html', '<h1></h1>');
-					this.el.def.getElement('h1').appendText(this.word);
+					this.el.def.set('html', '<h1>' + this.word + '</h1>');
 				}
 				this.el.pron.set('html', this.pronunciation.def);
 				
