@@ -107,7 +107,8 @@ var Dict = new Class({
 			this.cacheDefs = [];
 			this.cacheProns = [];
 			this.word = '';
-			this.definition = '';
+			this.definition = {};
+			this.pronunciation = {};
 			
 			this.state = '';
 			
@@ -503,6 +504,7 @@ var Dict = new Class({
 			
 			this.word = word;
 			this.definition = {};
+			this.pronunciation = {};
 			
 			if ( (word != '') && !this.getDefFromCache(word) )
 				this.getDef(word);
@@ -577,10 +579,10 @@ var Dict = new Class({
 						}
 					}
 					
-					this.definition = {
+					this.definition = defs.length ? {
 										  def: defs.join("\r\n\r\n")
 										, db: lastDefDb
-					};
+					} : {};
 					
 					this.pronunciation = prons.length ? {
 										  def: this.options.pron.openTag
@@ -591,7 +593,7 @@ var Dict = new Class({
 										  	)
 										  	+ this.options.pron.closeTag
 										, db: lastPronDb
-					} : '';	
+					} : {};	
 					
 					if (this.definition.def || this.pronunciation.def) {
 						this.addToCache(this.word, this.definition, this.pronunciation);
