@@ -289,7 +289,7 @@ div.buttons div {
 	border-radius: 5px;
 	vertical-align: top;
 	
-	font-family: 'Trebuchet MS', sans-serif;
+	font-family: sans-serif;
 	font-weight: normal;
 	font-size: 24px;
 	line-height: 20px;
@@ -302,11 +302,9 @@ div.buttons div {
 #dict-submit {
 	height: 37px;
 	width: 37px;
-	line-height: 33px;
+	line-height: 37px;
 	margin-left: -37px;
-}
 
-#dict-submit {
 	-webkit-border-bottom-left-radius: 0;
 	-moz-border-radius-bottomleft: 0;
 	border-bottom-left-radius: 0;
@@ -317,6 +315,13 @@ div.buttons div {
 
 #dict-reset {
 	display: none;
+}
+
+/* Remove button padding in FF, thank you stackoverflow */
+input::-moz-focus-inner
+{ 
+    border: 0;
+    padding: 0;
 }
 
 #dict-input {
