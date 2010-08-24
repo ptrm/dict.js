@@ -119,7 +119,7 @@ var Dict = new Class({
 		}
 		
 		, initVars: function () {
-			this.lastHash = location.hash;
+			this.lastHash = this.getHash();
 			this.el = {};
 			this.cacheWords = [];
 			this.cacheDefs = [];
@@ -157,7 +157,7 @@ var Dict = new Class({
 												}
 				});
 				this.el.iframe.inject(document.body, 'top');
-				this.setIFrameHash(location.hash);
+				this.setIFrameHash(this.getHash());
 			}
 			else {
 				this.el.iframe = null;
@@ -341,7 +341,7 @@ var Dict = new Class({
 			id = (parent != null) ? '#' + parent.id : '';
 			
 			$$(id + ' a.dict_showDef').each(function (link) {
-				link.set('href', '#def:' + encodeURIComponent(link.get('text')) );
+				link.set('href', '#def:' + encodeURI(link.get('text')) );
 				link.addEvent('click', this.wordClick.bindWithEvent(this, link));
 
 				link.removeClass('dict_showDef');
@@ -386,12 +386,14 @@ var Dict = new Class({
 			this.el.dbInfo.set('html', '');
 		}
 		
+		, nn: 0
+		
 		, checkHash: function () {
-			hash = location.hash;
+			var hash = this.getHash();
 
 			// workarounds for IE
 			if ( this.el.iframe ) {
-				iframeHash = this.el.iframe.contentWindow.location.hash;
+				iframeHash = this.getHash(this.el.iframe.contentWindow);
 				
 				if ( hash == iframeHash )
 					return;
@@ -399,7 +401,7 @@ var Dict = new Class({
 				// user used back/forward buttons
 				if ( (iframeHash != this.lastHash) ) {
 					this.lastHash = iframeHash;
-					location.hash = iframeHash;
+					this.setHash(iframeHash);
 				}
 				// user changed hash by entering it/clicking a link, so update iframe
 				else {
@@ -416,20 +418,26 @@ var Dict = new Class({
 
 			this.parseHash();
 			
-			this.fireEvent('hashchange', location.hash);
+			this.fireEvent('hashchange', this.getHash());
+		}
+		
+		, getHash: function (win) {
+			var hash = (win || window).location.hash.replace(/^#/, '');
+			return decodeURI(hash);
 		}
 		
 		, updateWindow: function (word) {
-			hash = ( word != '' ? '#def:' + word : '');
+			var hash = ( word != '' ? 'def:' + word : '');
 
-			if ( this.options.modifyHash && (hash != location.hash) ) {
-				location.hash = hash;
+			if ( this.options.modifyHash && (hash != this.getHash()) ) {
+				this.setHash(hash);
 				
 				// important to leave it this way! Otherwise browser might get into a loop,
 				// e.g. changing spaces into '%20's, so that the script will consider the hash changed
-				this.lastHash = location.hash;
+				this.lastHash = this.getHash();
+				
 				if (this.el.iframe) {
-					this.setIFrameHash(location.hash);
+					this.setIFrameHash(this.getHash());
 				}
 			}
 			
@@ -438,20 +446,25 @@ var Dict = new Class({
 			}
 		}
 		
+		, setHash: function (hash, win) {
+			(win || window).location.hash = encodeURI(hash);
+		}
+		
 		, setIFrameHash: function (hash) {
 			if (!this.el.iframe)
 				return;
 			
 			this.el.iframe.contentWindow.document.open();
 			this.el.iframe.contentWindow.document.close();
-			this.el.iframe.contentWindow.document.location.hash = hash;
+			this.setHash(hash, this.el.iframe.contentWindow.document);
 		}
 		
 		, parseHash: function () {
-			defMatch = new RegExp('^#def:');
+			defMatch = new RegExp('^def:');
+			hash = this.getHash();
 			
-			if ( location.hash.match(defMatch) ) {
-				def = decodeURI( location.hash.replace(defMatch, '') );
+			if ( hash.match(defMatch) ) {
+				def = hash.replace(defMatch, '');
 				
 				if (def)
 					this.loadDef(def);
