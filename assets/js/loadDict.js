@@ -101,17 +101,26 @@ var captions = {
 		, elements: {
 			/*  'a[rel=about]': 'info'
 			  
-			,*/ '#about': '<p>'
-						+ '<a href="http://github.com/ptrm/dict.js"><strong>Dict.js</strong></a> – prosty interfejs do <a href="http://github.com/ptrm/dict.json">dict.json</a> napisany przy użyciu <a href="http://mootools.net/">mootools</a> i <a href="http://lipidity.com/fancy-form/">FancyForm</a>.'
-						+ '</p>'
-						+ '<p>'
-						+ '	Sprawdź znaczenie ktoregokolwiek słowa z definicji klikając na nie.'
-						+ '</p>'
-						+ '<p>'
-						+ '	Użyj przycisków wstecz i naprzód aby przęłączać pomiędzy ostatnimi definicjami.'
-						+ '	(obecnie nie działa pod IE)'
-						+ '</p>'
-			
+			,*/ '#about': '<h1><a href="http://github.com/ptrm/dict.js">Dict.js</a>'
+							+ '	<span class="desc">– prosty front-end do <a href="http://github.com/ptrm/dict.json">dict.json</a>.'
+							+ '</span></h1>'
+							+ '<p>'
+							+ '	Sprawdź znaczenie ktoregokolwiek słowa z definicji klikając na nie.'
+							+ '</p>'
+							+ '<p>'
+							+ '	Użyj przycisków wstecz i naprzód aby przęłączać pomiędzy ostatnimi definicjami.'
+							+ '</p>'
+							+ '<h1>Credits</h1>'
+							+ '<p>'
+							+ '	Napisano przy użyciu <a href="http://mootools.net/">mootools</a> i <a href="http://lipidity.com/fancy-form/">FancyForm</a>.'
+							+ '</p>'
+							+ '<p>'
+							+ '	Obsługa historii w Internet Explorerze oparta na <a href="http://github.com/tkyk/jquery-history-plugin">jQuery history plugin</a> Taku Sano (<a href="http://www.mikage.to">Mikage Sawatari</a>) z poprawkami <a href="http://github.com/tkyk">Takayuki Miwa</a>.'
+							+ '</p>'
+							+ '<p>'
+							+ '	Układ definicji inspirowany <a href="http://en.wikipedia.org/wiki/Dictionary_(software)">Dictionary.app</a> od Apple.'
+							+ '</p>'
+						
 			//, 'a[rel=prefs]': 'preferencje'
 			
 			, 'label[for=prefs_dontBuildLinks]': {

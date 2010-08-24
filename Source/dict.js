@@ -1,6 +1,11 @@
 /*
 	Dict.js, a dict.json interface
 	Copyright (c) 2010 Piotrek Marciniak, MIT Style License
+	
+	Credits:
+		IE history support based on jQuery history plugin, http://github.com/tkyk/jquery-history-plugin:
+			Originaly developed by Taku Sano (Mikage Sawatari). www.mikage.to
+			Forked by Takayuki Miwa. github.com/tkyk
 */
 
 var Dict = new Class({
@@ -59,8 +64,8 @@ var Dict = new Class({
 			//If we dont' wan't to repeatedly poll the hash, we check it only once.
 			if (this.options.pollHash)
 				this.checkHashIntervalId = this.checkHash.periodical(this.options.pollHashInterval, this);
-			else
-				this.parseHash();
+
+			this.parseHash();
 			
 			if ( this.isOpen() )
 				this.el.input.focus();
@@ -71,7 +76,7 @@ var Dict = new Class({
 			//code partly from http://davidwalsh.name/mootools-show-hide
 			if ( !Element.hide ) {
 				Element.implement({
-					hide: function() {	
+					hide: function() {
 						this.setStyle('display','none');
 					}
 				});
@@ -114,7 +119,7 @@ var Dict = new Class({
 		}
 		
 		, initVars: function () {
-			this.lastHash = '';
+			this.lastHash = location.hash;
 			this.el = {};
 			this.cacheWords = [];
 			this.cacheDefs = [];
@@ -143,6 +148,21 @@ var Dict = new Class({
 		}
 		
 		, build: function () {
+			// inserts an iframe if on IE 7 and lower
+			if ( this.options.pollHash && Browser.Engine.trident && (Browser.Engine.version <= 5) ) {
+				this.el.iframe = new IFrame({
+												  src: 'javascript:false;'
+												, styles: {
+															display: 'none'
+												}
+				});
+				this.el.iframe.inject(document.body, 'top');
+				this.setIFrameHash(location.hash);
+			}
+			else {
+				this.el.iframe = null;
+			}
+		
 			this.el.container = new Element('div', { id: this.options.baseId + '-container'});
 			this.el.main = new Element('div', { id: this.options.baseId + '-main'});
 			this.el.form = new Element('form', { id: this.options.baseId + '-form'
@@ -367,30 +387,64 @@ var Dict = new Class({
 		}
 		
 		, checkHash: function () {
-			newHash = location.hash;
-			
-			if ( newHash == this.lastHash)
-				return;
+			hash = location.hash;
+
+			// workarounds for IE
+			if ( this.el.iframe ) {
+				iframeHash = this.el.iframe.contentWindow.location.hash;
 				
-			this.lastHash = newHash;
+				if ( hash == iframeHash )
+					return;
+				
+				// user used back/forward buttons
+				if ( (iframeHash != this.lastHash) ) {
+					this.lastHash = iframeHash;
+					location.hash = iframeHash;
+				}
+				// user changed hash by entering it/clicking a link, so update iframe
+				else {
+					this.lastHash = hash;
+					this.setIFrameHash(hash);
+				}
+			}
+			else {
+				if ( hash == this.lastHash)
+					return;
+	
+				this.lastHash = hash;
+			}
+
 			this.parseHash();
 			
-			this.fireEvent('hashchange', newHash);
+			this.fireEvent('hashchange', location.hash);
 		}
 		
 		, updateWindow: function (word) {
-			if ( this.options.modifyHash ) {
-				hash = ( word != '' ? '#def:' + word : '');
+			hash = ( word != '' ? '#def:' + word : '');
+
+			if ( this.options.modifyHash && (hash != location.hash) ) {
 				location.hash = hash;
 				
 				// important to leave it this way! Otherwise browser might get into a loop,
 				// e.g. changing spaces into '%20's, so that the script will consider the hash changed
 				this.lastHash = location.hash;
+				if (this.el.iframe) {
+					this.setIFrameHash(location.hash);
+				}
 			}
 			
 			if ( this.options.modifyTitle ) {
-				document.title = ( word != '' ? '"' + word + '" — ' : '' )+ this.initialTitle;
+				document.title = ( word != '' ? '"' + word + '" — ' : '' ) + this.initialTitle;
 			}
+		}
+		
+		, setIFrameHash: function (hash) {
+			if (!this.el.iframe)
+				return;
+			
+			this.el.iframe.contentWindow.document.open();
+			this.el.iframe.contentWindow.document.close();
+			this.el.iframe.contentWindow.document.location.hash = hash;
 		}
 		
 		, parseHash: function () {
@@ -553,8 +607,6 @@ var Dict = new Class({
 		, setReqEvents: function() {
 			this.request.addEvents({
 				  success: function (json) {
-				  	this.setState('success');
-				  	
 				  	//so we won't get an error accessing it's values
 				  	json = new Hash(json);
 					
@@ -565,6 +617,8 @@ var Dict = new Class({
 							suggestions = (typeof json.suggestions == 'object') ? json.suggestions : [];
 						}
 						else suggestions = [];
+	
+					  	this.setState('success');
 					}
 					else {
 						this.setState('error');

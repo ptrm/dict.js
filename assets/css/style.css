@@ -130,7 +130,21 @@ div.box p {
 	padding: 0;
 }
 
-div.box p:first-child {
+div.box h1 {
+	margin: 0;
+	margin-top: 15px;
+	padding: 0;
+	font-size: 14px;
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	font-weight: bold;
+}
+
+div.box h1 span.desc {
+	font-size: 12px;
+	font-weight: normal;
+}
+
+div.box p:first-child, div.box h1:first-child {
 	margin-top: 0;
 }
 
@@ -357,7 +371,7 @@ div.buttons div {
 
 #dict-def h2 {
 	margin-top: 10px;
-	font-size: inherit;
+	font-size: 17px;
 	font-weight: normal;
 }
 
