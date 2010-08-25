@@ -426,7 +426,7 @@ var Dict = new Class({
 			
 			// return the undecoded string if decodeURI() fails
 			try {
-				return decodeURI(hash);
+				return Browser.Engine.gecko ? hash : decodeURI(hash);
 			}
 			catch (error) {
 				return hash;
