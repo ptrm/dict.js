@@ -423,7 +423,14 @@ var Dict = new Class({
 		
 		, getHash: function (win) {
 			var hash = (win || window).location.hash.replace(/^#/, '');
-			return decodeURI(hash);
+			
+			// return the undecoded string if decodeURI() fails
+			try {
+				return decodeURI(hash);
+			}
+			catch (error) {
+				return hash;
+			}
 		}
 		
 		, updateWindow: function (word) {
