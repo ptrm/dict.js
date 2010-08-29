@@ -436,6 +436,11 @@ var Dict = new Class({
 		, updateWindow: function (word) {
 			var hash = ( word != '' ? 'def:' + word : '');
 
+
+			if ( this.options.modifyTitle ) {
+				document.title = ( word != '' ? '"' + word + '" — ' : '' ) + this.initialTitle;
+			}
+
 			if ( this.options.modifyHash && (hash != this.getHash()) ) {
 				this.setHash(hash);
 				
@@ -446,10 +451,6 @@ var Dict = new Class({
 				if (this.el.iframe) {
 					this.setIFrameHash(this.getHash());
 				}
-			}
-			
-			if ( this.options.modifyTitle ) {
-				document.title = ( word != '' ? '"' + word + '" — ' : '' ) + this.initialTitle;
 			}
 		}
 		
