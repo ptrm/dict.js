@@ -18,7 +18,7 @@ a:hover {
 
 #links {
 	position: absolute;
-	left: 20px;
+	left: 5px;
 	top: 0px;
 	z-index: 10;
 	border: 2px #9a9a9a solid;
@@ -102,7 +102,7 @@ div.box {
 	display: none;
 	position: absolute;
 	width: 400px;
-	left: -15px;
+	left: -5px;
 	top: 19px;
 	z-index: 20;
 	padding: 10px;
@@ -245,20 +245,13 @@ div.buttons div {
 
 #dict-container {
 	position: relative;
-	width: 100%;
-	height: 100%;
-	left: 0;
-	top: 0;
 	
 	/* ie6 */
 	text-align: center;	
 }
 
 #dict-main {
-	width: 85%;
-	min-width: 740px;
-	margin: 10px auto;
-	
+	margin: 10px 25px;
 	background: white;
 
 	font-family: Baskerville, "Times New Roman", serif;
@@ -267,12 +260,14 @@ div.buttons div {
 }
 
 #dict-form {
-	width: 700px;
-	margin: 0 auto;
+	min-width: 200px;
+	max-width: 800px;
 	margin-bottom: 10px;
+	margin: 0 auto;
 	padding: 0;
 
 	font-family: Helvetica Neue, Arial, sans-serif;
+	text-align: center;
 }
 
 #dict-submit, #dict-reset {
@@ -325,19 +320,20 @@ input::-moz-focus-inner
 }
 
 #dict-input {
-	width: 540px;
+	width: 70%;
 	border: 1px solid #9a9a9a;
 	border-right-width: 37px;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	margin: 0;
-	margin-left: 60px;
 	padding: 2px;
 	height: 32px;
 	font-size: 24px;
 	line-height: 31px;
 	outline: none;
+	
+	text-align: left;
 	
 	-webkit-box-shadow: 2px 2px 4px #e0e0e0 inset;
 	-moz-box-shadow: 2px 2px 4px #e0e0e0 inset;
@@ -403,4 +399,14 @@ input::-moz-focus-inner
 #dict-dbInfo {
 	margin: 10px;
 	color: #707070;
+}
+
+@media only screen and (max-device-width: 480px) {
+	#dict-main {
+		margin: 5px;
+	}
+	
+	#dict-form {
+		text-align: right;
+	}
 }
