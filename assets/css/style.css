@@ -51,18 +51,6 @@ div.boxParent a.toggle {
 	padding: 0px 4px;
 	line-height: 15px;
 	border-left: 1px white solid;
-	-webkit-border-radius: 2px;
-	-moz-border-radius: 2px;
-	border-radius: 2px;
-	-webkit-border-top-left-radius: 0;
-	-webkit-border-top-right-radius: 0;
-	-webkit-border-bottom-left-radius: 0;
-	-moz-border-radius-topleft: 0;
-	-moz-border-radius-topright: 0;
-	-moz-border-radius-bottomleft: 0;
-	border-top-left-radius: 0;
-	border-top-right-radius: 0;
-	border-bottom-left-radius: 0;
 	
 	background: #9a9a9a;
 	
@@ -79,9 +67,12 @@ div.boxParent:first-child a.toggle {
 	-webkit-border-bottom-left-radius: 2px;
 	-moz-border-radius-bottomleft: 2px;
 	border-bottom-left-radius: 2px;
-	-webkit-border-bottom-right-radius: 0;
-	-moz-border-radius-bottomright: 0;
-	border-bottom-right-radius: 0;
+}
+
+div.boxParent:last-child a.toggle {
+	-webkit-border-bottom-right-radius: 2px;
+	-moz-border-radius-bottomright: 2px;
+	border-bottom-right-radius: 2px;
 }
 
 div.boxParent.show a.toggle {
@@ -101,7 +92,7 @@ div.box, #links {
 div.box {
 	display: none;
 	position: absolute;
-	width: 400px;
+	width: 250px;
 	left: -5px;
 	top: 19px;
 	z-index: 20;
@@ -243,6 +234,29 @@ div.buttons div {
 	margin-right: 10px;
 }
 
+#about {
+	width: 300px;
+}
+
+a[rel=bookmarklet] {
+	display: block;
+	width: 100px;
+	margin: 0 auto;
+	margin-top: 5px;
+	padding: 2px;
+	-webkit-border-radius: 10px;
+	-moz-border-radius: 10px;
+	border-radius: 10px;
+	background: royalblue;
+	
+	text-align: center;
+	color: white !important;
+}
+
+a[rel=bookmarklet]:hover {
+	text-decoration: none;
+}
+
 #dict-container {
 	position: relative;
 	
@@ -262,9 +276,10 @@ div.buttons div {
 #dict-form {
 	min-width: 200px;
 	max-width: 800px;
-	margin-bottom: 10px;
 	margin: 0 auto;
+	margin-bottom: 10px;
 	padding: 0;
+	padding-left: 20px;
 
 	font-family: Helvetica Neue, Arial, sans-serif;
 	text-align: center;
@@ -291,7 +306,7 @@ div.buttons div {
 	
 	background: #9a9a9a;
 	color: white;
-	text-shadow: -1px -1px 1px #707070;
+	text-shadow: -1px -1px 0 #707070;
 }
 
 #dict-submit {

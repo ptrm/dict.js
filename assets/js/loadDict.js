@@ -138,6 +138,8 @@ var captions = {
 			, '#prefs_save': 'zapisz'
 			
 			, '#prefs_discard': 'anuluj'
+			
+			, '#bookmarkletBox p': 'Przeciągnij link poniżej do paska zakładek. Następnie możesz zaznaczyć słowo lub frazę na dowolnej stronie i użyć stworzonej zakładki do wyświetlenia definicji.'
 		}
 	}
 };

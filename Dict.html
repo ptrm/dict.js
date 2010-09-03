@@ -32,6 +32,17 @@
 			</div>
 		</div>
 	</div>
+	
+	<div class="boxParent">
+		<a href="#" class="toggle">*</a>
+		<div class="box" id="bookmarkletBox">
+			<h1>Bookmarklet</h1>
+			<p>
+				Drag the link below to your bookmarks bar. Then you can select a word or phrase on any webpage and use the bookmark to display the definition.
+			</p>
+			<a href="javascript:if(!_dict_ptrm_eu_popup){var _dict_ptrm_eu_popup=null}(function(){var b='http://dict.ptrm.eu/#def:';var a=function(){fs=[function(){return window.getSelection()},function(){return document.getSelection()},function(){var e=document.selection&&document.selection.createRange();if(e.text){return e.text}return false}];var d=null;for(i=0;i<fs.length;i++){try{d=fs[i]()}catch(c){}if(d&&(d=new String(d).replace(/^\s+|\s+$/g,''))){return d}}return false};sel=a();if(!sel){return}if(_dict_ptrm_eu_popup){_dict_ptrm_eu_popup.close()}b+=encodeURIComponent(sel);_dict_ptrm_eu_popup=window.open(b,'_dict_ptrm_eu_popup','height=500,width=450,status=0,menubar=0,toolbar=0,location=0,resizable=1',false)})();" rel="bookmarklet" onClick="return false">check in dict</a>
+		</div>
+	</div>
 
 	<div class="boxParent">
 		<a href="#" class="toggle" rel="about">?</a>
