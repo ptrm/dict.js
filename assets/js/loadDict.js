@@ -18,6 +18,12 @@ document.addEvent('domready', function () {
 	loadPrefs();
 
 	d = new Dict(dictOptions);
+	
+	// show prettier titles
+	$$('[title]').addEvents({
+		  'mouseenter': el_showTitle
+		, 'mouseleave': el_hideTitle
+	});
 
 	// about show/hide with support for clicking outside the div
 	var clicked = function (ev) {
@@ -124,7 +130,7 @@ var captions = {
 			//, 'a[rel=prefs]': 'preferencje'
 			
 			, 'label[for=prefs_dontBuildLinks]': {
-											  title: 'ustaw jeśli przeglądarka zużywa za dużo RAMu podczas przeglądania tej strony'
+											  title: 'ustaw, jeśli przeglądarka zużywa za dużo RAMu podczas przeglądania tej strony'
 			}
 			
 			, 'label[for=prefs_dontBuildLinks] span': {
@@ -143,6 +149,88 @@ var captions = {
 		}
 	}
 };
+
+// modified, orignally from http://www.quirksmode.org/js/findpos.html
+function getMeasures(obj) {
+	var curleft = curtop = 0;
+	
+	var cobj = obj;
+	if (cobj.offsetParent) {
+		do {
+			curleft += cobj.offsetLeft;
+			curtop += cobj.offsetTop;
+		} while (cobj = cobj.offsetParent);
+	}
+	
+	return {
+		  x: curleft
+		, y: curtop
+		, width: obj.offsetWidth
+		, height: obj.offsetHeight
+	};
+}
+
+function el_showTitle(ev) {
+	try {
+		var title = this.get('title').trim();
+		
+		// if the title is empty it means the function's been called too many times
+		if ( !title )
+			return;
+		
+		// hide the title so the system default won't show
+		this.set('title', '');
+		this.set('_title', title);
+		
+		var toolTip = $('_toolTip');
+		if ( toolTip )
+			toolTip.dispose();
+		
+		toolTip = new Element('div', {
+			  id: '_toolTip'
+			, html: title
+		})
+			.set('tween', {duration: 'short'})
+			.fade('hide');
+		
+		toolTipTriangle = new Element('div', {'class': 'triangle'});
+		
+		toolTipTriangle.inject(toolTip, 'top');
+		toolTip.inject(document.body, 'bottom');
+		
+		elMeas = getMeasures(this);
+		tMeas = getMeasures(toolTip);
+		
+		toolTip.setStyles({
+			  position: 'absolute'
+			, left: elMeas.x + (elMeas.width/2 - tMeas.width/2)
+			, top: elMeas.y + elMeas.height
+		});
+		
+		toolTip.fade('in');
+	}
+	catch (err) {console.log(err)}
+}
+
+function el_hideTitle(ev) {
+	var toolTip = $('_toolTip');
+	if ( toolTip ) {
+		toolTip.fade('out');
+		toolTip.dispose.delay(500, toolTip);
+	}
+
+	try {
+		var title = this.get('_title');
+		
+		if ( !title )
+			return;
+	
+		// restore the title
+		this.set('title', title);
+		this.set('_title', '');
+	}
+	catch (err) {}
+}
 
 var prefs = $H({
 				  lang: null

@@ -257,6 +257,42 @@ a[rel=bookmarklet]:hover {
 	text-decoration: none;
 }
 
+/* from http://davidwalsh.name/css-triangles */
+#_toolTip .triangle {
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+	border-bottom: 5px solid black;
+	
+	margin: -12px auto 7px auto;
+	
+	font-size: 0;
+	line-height: 0;
+}
+
+/* otherwise IE7 didn't ignore this value and set the color to white */
+#_toolTip .triangle {
+	border-bottom-color: rgba(0,0,0, 0.8);
+}
+
+#_toolTip {
+	width: 200px;
+	margin: 0;
+	margin-top: 5px;
+	padding: 7px;
+	border-radius: 5px;
+	-webkit-border-radius: 5px;
+	-moz-border-radius: 5px;
+	z-index: 10000;
+	
+	font-size: 12px;
+	background: black;
+	background: rgba(0,0,0, 0.8);
+	color: white;
+	text-align: center;
+}
+
 #dict-container {
 	position: relative;
 	
