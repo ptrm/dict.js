@@ -26,8 +26,7 @@ document.addEvent('domready', function () {
 	});
 
 	// about show/hide with support for clicking outside the div
-	var clicked = function (ev) {
-		boxParent = this.getParent();
+	var clicked = function (ev, boxParent) {
 		show = !boxParent.hasClass('show');
 
 		hideAll();
@@ -36,7 +35,7 @@ document.addEvent('domready', function () {
 			boxParent.getElement('div.box').fireEvent('open');
 			boxParent.addClass('show');
 			
-			document.addEvent('click', outsideClick);
+			document.addEvent('click', hideAll);
 			
 			// otherwise document.onClick will be triggered
 			ev.stopPropagation();
@@ -47,24 +46,33 @@ document.addEvent('domready', function () {
 		ev.preventDefault();
 	}
 	
+	// menu-like behaviour of the links
+	var linksHover = function (ev, boxParent) {
+		// if none or our box is shown, there's nothing to do
+		if ( !$$('.boxParent.show').length || boxParent.hasClass('show') )
+			return;
+		
+		hideAll();
+		this.fireEvent('click');
+	}
+	
+	$$('div.boxParent a.toggle').each(function (el) {
+		boxParent = el.getParent();
+		el.addEvents({
+					  'click': clicked.bindWithEvent(el, boxParent)
+					, 'mouseenter': linksHover.bindWithEvent(el, boxParent)
+		});
+	});
+	
 	$('prefs_save').addEvent('click', function(ev) {
 														ev.preventDefault();
 														savePrefs();
 														hideAll();
-														$('prefs').fireEvent('open');
 	});
 	
 	$('prefs_discard').addEvent('click', function(ev) {
 														ev.preventDefault();
 														hideAll();
-														$('prefs').fireEvent('close');
-	});
-	
-	$$('div.boxParent a.toggle').each(function (el) {
-		el.addEvent(
-					  'click'
-					, clicked.bind(el)
-		);
 	});
 	
 	// don't let the document get notified about the click
@@ -72,14 +80,11 @@ document.addEvent('domready', function () {
 		ev.stopPropagation();
 	});
 	
-	var outsideClick = function (ev) {
-		$$('div.boxParent.show div.box').fireEvent('close');
-		hideAll();
-	}
-	
 	var hideAll = function () {
-		$$('div.boxParent').removeClass('show');
-		document.removeEvent('click', outsideClick );
+		$$('div.boxParent.show div.box').fireEvent('close');
+		$$('div.boxParent.show').removeClass('show');
+
+		document.removeEvent('click', hideAll);
 	}
 });
 
