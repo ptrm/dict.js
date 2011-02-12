@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+	<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:moz="http://www.mozilla.org/2006/browser/search/">
+		<ShortName>dict.ptrm.eu</ShortName>
+		<Description>Look up a word at dict.ptrm.eu</Description>
+		<Contact>dict@ptrm.eu</Contact>
+		<Url type="text/html" template="http://dict.ptrm.eu/#def:{searchTerms}"/>
+	</OpenSearchDescription>
