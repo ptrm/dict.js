@@ -537,7 +537,7 @@ var Dict = new Class({
 			this.loadDef(word);
 		}
 		
-		, setState: function (state) {
+		, setState: function (state, word) {
 			if ( this.options.hideStatus ) {
 				if ( state == 'success' )
 					this.el.status.hide();
@@ -576,7 +576,7 @@ var Dict = new Class({
 			}
 			
 			this.state = state;
-			this.fireEvent('statechange', state);
+			this.fireEvent('statechange', [state, this.word]);
 		}
 		
 		, loadDef: function (word) {
@@ -596,8 +596,19 @@ var Dict = new Class({
 			this.definition = {};
 			this.pronunciation = {};
 			
-			if ( (word != '') && !this.getDefFromCache(word) )
+			if ( word == '' )
+				return false;
+			
+			var cached = false;
+			
+			if ( this.getDefFromCache(word) ) {
+				cached = true;
+			}
+			else {
 				this.getDef(word);
+			}
+			
+			this.fireEvent('definition', [word, cached]);
 		}
 		
 		, reloadDef: function (removeFromCache) {

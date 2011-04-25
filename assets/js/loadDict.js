@@ -93,6 +93,22 @@ var dictOptions = {
 				, cacheSize: 128
 				, closeable: false
 				, captions: { submit: '→', cancel: '×' }
+				, onStatechange: function (state, word) {
+					try {
+						if ( !( state in {'error':'', 'fail':'', 'cancel':''} ) )
+							return;
+
+						_gaq && _gaq.push(['_trackEvent', 'statechange', state, word]);
+					}
+					catch (e) {}
+				}
+				
+				, onDefinition: function (word, cached) {
+					try {
+						_gaq && _gaq.push(['_trackEvent', 'definition', 'get' + ( cached ? ':cache' : '' ), word]);
+					}
+					catch (e) {}
+				}
 };
 
 var captions = {
