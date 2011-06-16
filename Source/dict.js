@@ -626,14 +626,18 @@ var Dict = new Class({
 		
 		, getDef: function (word) {
 			this.setState('loading');
-			this.request.send(Hash.toQueryString({
+			this.request.send(
+				Hash.toQueryString({
 													  word: word
 													, suggestions: true
 													, db: [
 														    this.options.defDb
 														  , this.options.pron.db
 													]
-			}));
+				})
+				//For compatibility across the node.js versions
+				.replace(/\[[0-9]+\]/g, '[]')
+			);
 		}
 		
 		, setReqEvents: function() {
