@@ -92,7 +92,7 @@ var dictOptions = {
 				  hotkey: { key: 'l' }
 				, cacheSize: 128
 				, closeable: false
-				, captions: { submit: '→', cancel: '×' }
+				, captions: { submit: '►', cancel: '×' }
 				, onStatechange: function (state, word) {
 					try {
 						if ( !( state in {'error':'', 'fail':'', 'cancel':''} ) )
