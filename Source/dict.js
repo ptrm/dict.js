@@ -19,6 +19,7 @@ var Dict = new Class({
 		  					, stateCancelled: 'Request cancelled.'
 		  					, stateLoading: 'Retrieving definition...'
 		  					, suggestion: 'Did you mean:'
+							, welcome: 'Wordnet ® 3.0 English dictionary'
 		  		}
 		  		, hotkey: {
 		  					  key: null
@@ -176,7 +177,11 @@ var Dict = new Class({
 			this.el.reset = new Element('input', {id: this.options.baseId + '-reset'
 													, type: 'reset'
 													});
-			this.el.def = new Element('div', {id: this.options.baseId + '-def'});
+			this.el.def = new Element('div', {
+				  id: this.options.baseId + '-def'
+				, html: this.options.captions.welcome
+			}
+			);
 			this.el.dbInfo = new Element('div', {id: this.options.baseId + '-dbInfo'});
 			
 			this.el.pron = new Element('div', {id: this.options.baseId + '-pron'});
